@@ -1,7 +1,7 @@
 require 'socket'
 module Connection
   def self.broadcast()
-	  	t = Thread.new do
+	  	Thread.new do
 	    addr = ['<broadcast>', 33333]# broadcast address
 		#addr = ('255.255.255.255', 33333) # broadcast address explicitly [might not work ?]
 		#addr = ['127.0.0.255', 33333] # ??
@@ -17,7 +17,7 @@ module Connection
 	# t.join
   end
 
-  def self.connection()
+  def self.connect()
 	addr = ['0.0.0.0', 33333]  # host, port
 	BasicSocket.do_not_reverse_lookup = true
 	# Create socket and bind to address
@@ -32,13 +32,37 @@ module Connection
 	puts 'connected: ' + addr[2].to_s + ' ' + data
   end
 
-  def self.connect()
-    t = Thread.new do 
+  def self.create_connection()
+    Thread.new do 
     	server = TCPServer.open($out_port)
     	puts "TCP started at " + $out_port.to_s
     	$right_client = server.accept
     	$broadcast = false
     end
-    # t.join
   end
+
+  def self.command_parser(command, data)
+  	nil
+  end
+
+  def self.left_listener
+  	Thread.new do 
+  		loop {
+  			command = $left_client.gets.chomp
+  			data = $left_client.gets.chomp
+  			Connection::command_parser(command, data)
+  		}
+  	end
+  end
+
+  def self.right_listener
+  	Thread.new do 
+  		loop {
+  			command = $right_client.gets.chomp
+  			data = $right_client.gets.chomp
+  			Connection::command_parser(command, data)
+  		}
+  	end
+  end
+
 end
