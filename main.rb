@@ -18,6 +18,9 @@ elsif(ARGV[0].eql? '1')
 	Connection::create_connection()
 elsif(ARGV[0].eql? '2')
 	Connection::connect()
+else
+	puts "wrong arguments. :("
+	exit
 end
 
 Thread.list.each { |thr| thr.join if thr != Thread.main}
