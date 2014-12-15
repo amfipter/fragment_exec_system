@@ -75,12 +75,23 @@ module Misc
 		end
 		Connection::send('left', 'get_data'+$node_id.to_s, id.to_s)
 		Connection::send('right', 'get_data'+$node_id.to_s, id.to_s)
-
+		while(true) do
+			break if $data_not_found == 2
+			break if $data_accept
+			sleep 1.0/100
+		end
+		$data_accept = false
+		$data_not_found = 0
+		nil
 	end
 
 	def self.wait_for_mutex()
 		while($mutex.locked?)
 			sleep 1.0/100
 		end
+	end
+
+	def self.resolve_data_dep(data_dep_list)
+		nil
 	end
 end
