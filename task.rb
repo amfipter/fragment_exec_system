@@ -1,11 +1,13 @@
 class Task
 	attr_reader :dest_id, :data_deps
-	def initialize(dest_id, p = 0)
+	def initialize(dest_id, exec, p = 0)
 		@dest_id = dest_id
 		@name = ''
     @data_deps = Array.new
     @priority = p
     @code = Array.new
+    @execution_code = exec
+    @output_data = nil
 	end
 
   def add_data_dep(data_id)
@@ -21,7 +23,8 @@ class Task
     @data_deps
   end
 
-  def run()
-    nil
+  def run(input_data)
+    @output_data = @execution_code.call(input_data)
+    @output_data
   end
 end

@@ -61,7 +61,7 @@ module Misc
 
 	def self.data_search(id)
 		$data_stack.each do |d|
-			if(d.id == id )
+			if(d.id.eql? id )
 				$data_stack.delete d if $delete_data_copies
 				return d
 			end
@@ -71,15 +71,15 @@ module Misc
 
 	def self.get_data(id)
 		$data_stack.each do |data|
-			return nil if data.id == id 
+			return nil if data.id.eql? id 
 		end
 
 		if($left_client.nil? or $right_client.nil?)
 			$data_not_found = 1
 		end
 		
-		Connection::send('left', 'get_data'+$node_id.to_s, id.to_s)
-		Connection::send('right', 'get_data'+$node_id.to_s, id.to_s)
+		Connection::send('left', 'get_data'+$node_id.to_s, id)
+		Connection::send('right', 'get_data'+$node_id.to_s, id)
 		while(true) do
 			break if $data_not_found == 2
 			break if $data_accept
