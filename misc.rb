@@ -104,3 +104,77 @@ module Misc
 		nil
 	end
 end
+
+class Matrix
+	attr_reader :dim, :data
+	def initialize(dim, slices, empty=false)
+		@data = Array.new(dim) {|el| el = Array.new(dim) {|el1| el1 = 0}}
+		@dim = dim
+		@slices = slices
+		init() unless empty
+	end
+
+	def init()
+		@dim.times do |i|
+			@dim.times do |j|
+				@data[i][j] = i*@dim + j
+			end
+		end
+	end
+
+	def slice_out(s_i, s_j)
+		out = Matrix.new(@dim/slices, 1)
+		size = @dim/@slices
+		(s_i*size).upto((s_i + 1)*size) do |i|
+			(s_j*size).upto((s_j + 1)*size) do |j|
+				out.set(i-s_i*size, j-s_j*size, @data[i][j])
+			end
+		end
+		out
+	end
+
+	def slice_in(i, j, slice)
+		size = @dim/@slices
+		(s_i*size).upto((s_i + 1)*size) do |i|
+			(s_j*size).upto((s_j + 1)*size) do |j|
+				@data[i][j] = slice.data[i-s_i*size][j-s_j*size]
+			end
+		end
+	end
+
+	def mul_part(m1, m2)
+		out = Matrix.new(m1.dim, 1)
+		m1.dim.times do |i|
+			m1.dim.times do |j|
+				out[i][j] = 0
+				m1.dim.times do |k|
+					out[i][j] += m1[i][k]*m2[k][j]
+				end
+			end
+		end
+		out 
+	end
+
+	def add_part(m1, m2)
+		m1.dim.times do |i|
+			m1.dim.times do |j|
+				m1[i][j] += m2[i][j]
+			end
+		end
+	end
+
+	def set(i, j, d)
+		@data[i][j] = d
+	end
+
+	def print()
+		@dim.times do |i|
+			@dim.times do |j|
+				print "#{@data[i][j]} "
+			end
+			puts ''
+		end
+		puts ''
+	end
+
+end
