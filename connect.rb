@@ -100,11 +100,11 @@ module Connection
   def self.left_listener
   	puts 'Connection::left_listener' if $debug_trace
   	Thread.new do 
-  		loop {
+  		while($lisnener_work) do
   			command = $left_client.gets.chomp
   			data = $left_client.gets.chomp
   			Connection::command_parser(command, data, 'left')
-  		}
+  		end
   	end
   	nil
   end
@@ -112,17 +112,17 @@ module Connection
   def self.right_listener
   	puts 'Connection::right_listener' if $debug_trace
   	Thread.new do 
-  		loop {
+  		while($lisnener_work) do
   			command = $right_client.gets.chomp
   			data = $right_client.gets.chomp
   			Connection::command_parser(command, data, 'right')
-  		}
+  		end
   	end
   	nil
   end
 
   def self.send(dest, command, data)
-  	puts "Connection::send #{dest}" if $debug_trace
+  	puts "Connection::send #{dest}; #{command}" if $debug_trace
   	if(dest.class.eql? Fixnum)
   		if(dest < $node_id)
   			unless($left_client.nil?)

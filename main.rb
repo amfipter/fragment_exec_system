@@ -14,6 +14,7 @@ $node_id = nil
 $task_stack = Array.new
 $data_stack = Array.new
 $debug_trace = true
+$lisnener_work = true
 
 if(ARGV[0].eql? '0')
 	puts '0'
@@ -50,5 +51,8 @@ end
 unless($right_client.nil?)
 	Connection::right_listener()
 end
+
+e = Execution.new 
+e.run
 
 Thread.list.each { |thr| thr.join if thr != Thread.main}
