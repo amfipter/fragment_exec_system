@@ -15,6 +15,8 @@ $task_stack = Array.new
 $data_stack = Array.new
 $debug_trace = true
 $lisnener_work = true
+$data_accept = false
+$data_not_found = 0
 
 if(ARGV[0].eql? '0')
 	puts '0'

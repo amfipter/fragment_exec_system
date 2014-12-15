@@ -95,6 +95,29 @@ module Connection
   	if(command.eql? 'status')
   		Misc::status(from)
   	end
+
+  	if(command =~ /get_data(\d+)/)
+  		dest = $1.to_i
+  		data_part = Misc::data_search(data.to_i)
+  		unless(data_part.nil?)
+  			Misc::send_ser(d, dest, 'transfer')
+  		else
+  			if(from.eql? 'left')
+  				if($right_client.nil?)
+  					Connection::send(dest, 'transfer', 'data_not_found')
+  				else
+  					Connection::send('right', command, data)
+  				end
+  			else
+  				if($left_client.nil?)
+  					Connection::send(dest, 'transfer', 'data_not_found')
+  				else
+  					Connection::send('left', command, data)
+  				end
+  			end
+  		end
+  	end
+
   end
 
   def self.left_listener

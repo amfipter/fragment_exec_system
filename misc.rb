@@ -1,9 +1,18 @@
 module Misc
 	def self.data_task_deser(ser_data)
 		puts 'Misc::data_task_deser' if $debug_trace
-		data = Marshal.load(eval(ser_data))
-		$data_stack.push data if data.class.eql? Data 
-		$task_stack.push data if data.class.eql? Task
+		$mutex.synchronize do 
+			if(ser_data.eql? 'data_not_found')
+				$data_not_found += 1
+				return nil
+			end
+			data = Marshal.load(eval(ser_data))
+			if (data.class.eql? Data)
+				$data_stack.push data 
+				$data_accept = true
+			end
+			$task_stack.push data if data.class.eql? Task
+		end
 		nil
 	end
 
@@ -46,5 +55,20 @@ module Misc
 				Misc::send_ser(t, t.dest_id, 'transfer')
 			end
 		end
+	end
+
+	def self.data_search(id)
+		$data_stack.each do |d|
+			return d if d.id == id 
+		end
+		nil
+	end
+
+	def self.get_data(id)
+		if($left_client.nil? or $right_client.nil?)
+			$data_not_found = 1
+		end
+		Connection::send('left', 'get_data'+$node_id.to_s)
+		#UNCOMPLETE
 	end
 end
