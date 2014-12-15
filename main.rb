@@ -20,6 +20,8 @@ $data_not_found = 0
 
 $delete_data_copies = true
 
+exit
+
 if(ARGV[0].eql? '0')
 	puts '0'
 	Connection::broadcast()

@@ -112,6 +112,7 @@ class Matrix
 		@dim = dim
 		@slices = slices
 		init() unless empty
+		# print_
 	end
 
 	def init()
@@ -123,51 +124,57 @@ class Matrix
 	end
 
 	def slice_out(s_i, s_j)
-		out = Matrix.new(@dim/slices, 1)
+		out = Matrix.new(@dim/@slices, 1)
 		size = @dim/@slices
-		(s_i*size).upto((s_i + 1)*size) do |i|
-			(s_j*size).upto((s_j + 1)*size) do |j|
+		(s_i*size).upto((s_i + 1)*size -1) do |i|
+			(s_j*size).upto((s_j + 1)*size -1) do |j|
+				# puts "#{i} #{j}"
 				out.set(i-s_i*size, j-s_j*size, @data[i][j])
 			end
 		end
 		out
 	end
 
-	def slice_in(i, j, slice)
+	def slice_in(s_i, s_j, slice)
 		size = @dim/@slices
-		(s_i*size).upto((s_i + 1)*size) do |i|
-			(s_j*size).upto((s_j + 1)*size) do |j|
+		(s_i*size).upto((s_i + 1)*size -1) do |i|
+			(s_j*size).upto((s_j + 1)*size -1) do |j|
 				@data[i][j] = slice.data[i-s_i*size][j-s_j*size]
 			end
 		end
 	end
 
-	def mul_part(m1, m2)
+	def self.mul_part(m1, m2)
 		out = Matrix.new(m1.dim, 1)
 		m1.dim.times do |i|
 			m1.dim.times do |j|
-				out[i][j] = 0
+				out.set(i, j, 0)
 				m1.dim.times do |k|
-					out[i][j] += m1[i][k]*m2[k][j]
+					out.add(i, j, m1.data[i][k]*m2.data[k][j])
 				end
 			end
 		end
 		out 
 	end
 
-	def add_part(m1, m2)
+	def self.add_part(m1, m2)
 		m1.dim.times do |i|
 			m1.dim.times do |j|
-				m1[i][j] += m2[i][j]
+				m1.data[i][j] += m2.data[i][j]
 			end
 		end
 	end
 
 	def set(i, j, d)
+		# puts "#{i} #{j}"
 		@data[i][j] = d
 	end
 
-	def print()
+	def add(i, j, d)
+		@data[i][j] += d
+	end
+
+	def print_()
 		@dim.times do |i|
 			@dim.times do |j|
 				print "#{@data[i][j]} "
