@@ -62,7 +62,7 @@ module Misc
 	def self.data_search(id)
 		$data_stack.each do |d|
 			if(d.id == id )
-				$data_stack.delete d
+				$data_stack.delete d if $delete_data_copies
 				return d
 			end
 		end
@@ -89,9 +89,13 @@ module Misc
 		while($mutex.locked?)
 			sleep 1.0/100
 		end
+		nil
 	end
 
 	def self.resolve_data_dep(data_dep_list)
+		data_dep_list.each do |id|
+			Misc::get_data(id)
+		end
 		nil
 	end
 end
