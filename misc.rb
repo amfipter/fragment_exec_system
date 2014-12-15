@@ -70,9 +70,14 @@ module Misc
 	end
 
 	def self.get_data(id)
+		$data_stack.each do |data|
+			return nil if data.id == id 
+		end
+
 		if($left_client.nil? or $right_client.nil?)
 			$data_not_found = 1
 		end
+		
 		Connection::send('left', 'get_data'+$node_id.to_s, id.to_s)
 		Connection::send('right', 'get_data'+$node_id.to_s, id.to_s)
 		while(true) do
