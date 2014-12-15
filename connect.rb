@@ -15,7 +15,7 @@ module Connection
 			end
 			udp.close
 		end
-	# t.join
+		nil
   end
 
   def self.connect()
@@ -34,6 +34,7 @@ module Connection
 		$node_id = $out_port - 30000
 		$left_client = TCPSocket.open(addr[2], data.to_i)
 		puts 'connected: ' + addr[2].to_s + ' ' + data
+		nil
   end
 
   def self.wait_last_connection()
@@ -49,6 +50,7 @@ module Connection
 			data, addr = udp.recvfrom(1024)
 		end
 		udp.close
+		nil
   end
 
   def self.last_connection_broadcast()
@@ -62,6 +64,7 @@ module Connection
 		data = 'last'
 		udp.send(data, 0, addr[0], addr[1])
 		udp.close
+		nil
 	end
 
   def self.create_connection()
@@ -72,10 +75,26 @@ module Connection
     	$right_client = server.accept
     	$broadcast = false
     end
+    nil
   end
 
-  def self.command_parser(command, data)
-  	nil
+  def self.command_parser(command, data, from)
+  	puts 'Connection::command_parser' if $debug_trace
+  	puts "get command: " + command
+  	if(command =~ /transfer(\d+)/)
+  		dest = $1.to_i
+  		if(dest == $node_id)
+  			Misc::data_task_deser(data)
+  			return nil
+  		else
+  			Connection::send(dest, 'transfer', data)
+  			return nil
+  		end
+  	end
+
+  	if(command.eql? 'status')
+  		Misc::status(from)
+  	end
   end
 
   def self.left_listener
@@ -84,9 +103,10 @@ module Connection
   		loop {
   			command = $left_client.gets.chomp
   			data = $left_client.gets.chomp
-  			Connection::command_parser(command, data)
+  			Connection::command_parser(command, data, 'left')
   		}
   	end
+  	nil
   end
 
   def self.right_listener
@@ -95,9 +115,46 @@ module Connection
   		loop {
   			command = $right_client.gets.chomp
   			data = $right_client.gets.chomp
-  			Connection::command_parser(command, data)
+  			Connection::command_parser(command, data, 'right')
   		}
   	end
+  	nil
   end
 
+  def self.send(dest, command, data)
+  	puts "Connection::send #{dest}" if $debug_trace
+  	if(dest.class.eql? Fixnum)
+  		if(dest < $node_id)
+  			unless($left_client.nil?)
+	  			$left_client.puts command + dest.to_s
+	  			$left_client.puts data
+	  		end
+  		elsif(dest > $node_id)
+  			unless($right_client.nil?)
+	  			$right_client.puts command + dest.to_s
+	  			$right_client.puts data
+	  		end
+  		else
+  			puts 'Fixnum destination error.'
+  		end
+  	end
+
+  	if(dest.class.eql? String)
+  		if(dest.eql? 'left')
+  			unless($left_client.nil?)
+	  			$left_client.puts command
+	  			$left_client.puts data
+	  		end
+  		elsif(dest.eql? 'right')
+  			unless($right_client.nil?)
+	  			$right_client.puts command
+	  			$right_client.puts data
+	  		end
+  		else
+  			puts 'String destination error.'
+  		end
+  	end
+  	nil
+  end
+  				
 end

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require './connect.rb'
+require './misc.rb'
 require './execution.rb'
 require './data.rb'
 require './task.rb'
@@ -12,7 +13,7 @@ $mutex = Mutex.new
 $node_id = nil
 $task_stack = Array.new
 $data_stack = Array.new
-$debug_trace = false
+$debug_trace = true
 
 if(ARGV[0].eql? '0')
 	puts '0'
@@ -32,6 +33,10 @@ elsif(ARGV[0].eql? '2')
 else
 	puts "wrong arguments. :("
 	exit
+end
+
+Signal.trap("TSTP") do
+	Misc::status()
 end
 
 Thread.list.each { |thr| thr.join if thr != Thread.main}
