@@ -1,6 +1,7 @@
 module Misc
 	def self.data_task_deser(ser_data)
 		puts 'Misc::data_task_deser' if $debug_trace
+		Misc::wait_for_mutex()
 		$mutex.synchronize do 
 			if(ser_data.eql? 'data_not_found')
 				$data_not_found += 1
@@ -70,5 +71,11 @@ module Misc
 		end
 		Connection::send('left', 'get_data'+$node_id.to_s)
 		#UNCOMPLETE
+	end
+
+	def self.wait_for_mutex()
+		while($mutex.locked?)
+			sleep 1.0/100
+		end
 	end
 end
