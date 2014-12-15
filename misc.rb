@@ -2,13 +2,14 @@ module Misc
 	def self.data_task_deser(ser_data)
 		puts 'Misc::data_task_deser' if $debug_trace
 		Misc::wait_for_mutex()
+		#check
 		$mutex.synchronize do 
 			if(ser_data.eql? 'data_not_found')
 				$data_not_found += 1
 				return nil
 			end
 			data = Marshal.load(eval(ser_data))
-			if (data.class.eql? Data)
+			if (data.class.eql? Data_)
 				$data_stack.push data 
 				$data_accept = true
 			end
@@ -60,7 +61,10 @@ module Misc
 
 	def self.data_search(id)
 		$data_stack.each do |d|
-			return d if d.id == id 
+			if(d.id == id )
+				$data_stack.delete d
+				return d
+			end
 		end
 		nil
 	end
@@ -69,8 +73,9 @@ module Misc
 		if($left_client.nil? or $right_client.nil?)
 			$data_not_found = 1
 		end
-		Connection::send('left', 'get_data'+$node_id.to_s)
-		#UNCOMPLETE
+		Connection::send('left', 'get_data'+$node_id.to_s, id.to_s)
+		Connection::send('right', 'get_data'+$node_id.to_s, id.to_s)
+
 	end
 
 	def self.wait_for_mutex()

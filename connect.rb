@@ -100,7 +100,7 @@ module Connection
   		dest = $1.to_i
   		data_part = Misc::data_search(data.to_i)
   		unless(data_part.nil?)
-  			Misc::send_ser(d, dest, 'transfer')
+  			Misc::send_ser(data_part, dest, 'transfer')
   		else
   			if(from.eql? 'left')
   				if($right_client.nil?)
@@ -126,7 +126,10 @@ module Connection
   		while($lisnener_work) do
   			command = $left_client.gets.chomp
   			data = $left_client.gets.chomp
-  			Connection::command_parser(command, data, 'left')
+        # Misc::wait_for_mutex()
+        # $mutex.lock
+    		Connection::command_parser(command, data, 'left')
+        # $mutex.unlock
   		end
   	end
   	nil
@@ -138,7 +141,10 @@ module Connection
   		while($lisnener_work) do
   			command = $right_client.gets.chomp
   			data = $right_client.gets.chomp
-  			Connection::command_parser(command, data, 'right')
+        # Misc::wait_for_mutex()
+        # $mutex.lock
+    		Connection::command_parser(command, data, 'right')
+        # $mutex.unlock
   		end
   	end
   	nil
