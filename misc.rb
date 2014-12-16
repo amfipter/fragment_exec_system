@@ -160,7 +160,7 @@ class Matrix
 	def self.add_part(m1, m2)
 		m1.dim.times do |i|
 			m1.dim.times do |j|
-				m1.data[i][j] += m2.data[i][j]
+				m1.add(i, j, m2.data[i][j])
 			end
 		end
 	end
