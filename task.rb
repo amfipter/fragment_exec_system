@@ -1,7 +1,7 @@
 class Task
-	attr_reader :dest_id, :data_deps
+	attr_reader :dest_id, :data_deps, :priority
   attr_accessor :name
-	def initialize(dest_id, exec, p = 0)
+	def initialize(dest_id, exec=nil, p = 0)
 		@dest_id = dest_id
 		@name = ''
     @data_deps = Array.new

@@ -4,6 +4,10 @@ require './misc.rb'
 require './execution.rb'
 require './data.rb'
 require './task.rb'
+require './matrix_mul_module.rb'
+
+#local search
+#delete data fragment
 
 $broadcast = true
 $out_port = 30000
@@ -18,9 +22,8 @@ $lisnener_work = true
 $data_accept = false
 $data_not_found = 0
 
-$delete_data_copies = true
+$delete_data_copies = false
 
-exit
 
 if(ARGV[0].eql? '0')
 	puts '0'

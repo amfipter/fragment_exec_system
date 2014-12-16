@@ -80,7 +80,7 @@ class Matrix_mul_generator
 	def random_m_dist()
 		r = Random.new
 		@m_fragment_dist = Array.new 
-		(@matrix_dim**2).times do
+		(@matrix_dim**3).times do
 			@m_fragment_dist.push r.rand(0..@node_count-1)
 		end
 	end
@@ -88,14 +88,14 @@ class Matrix_mul_generator
 	def random_s_dist()
 		r = Random.new
 		@s_fragment_dist = Array.new 
-		(@matrix_dim**3).times do
+		(@matrix_dim**2).times do
 			@s_fragment_dist.push r.rand(0..@node_count-1)
 		end
 	end
 
 	def generate_s_tasks()
 		s_tasks = Array.new 
-		@slices.times.do |i|
+		@slices.times do |i|
 			@slices.times do |j|
 				t = Task.new(@s_fragment_dist[i*@slices + j], @s_exec, 1)
 				t.name = "S_FRAGMENT"
@@ -111,6 +111,7 @@ class Matrix_mul_generator
 	def generate_out_tasks()
 		out_tasks = Array.new
 		t = Task.new(0, @out_exec, 2)
+		t.name = "OUT_FRAGMENT"
 		@slices.times do |i|
 			@slices.times do |j|
 				t.add_data_dep("out_#{i}_#{j}")
@@ -129,6 +130,7 @@ class Matrix_mul_generator
 					t = Task.new(@m_fragment_dist[i*@slices**2 + j*@slices + k], @m_exec, 0)
 					t.add_data_dep("1m_#{i}_#{j}")
 					t.add_data_dep("2m_#{i}_#{k}")
+					t.name = "M_FRAGMENT"
 					m_tasks.push t 
 				end
 			end
@@ -149,6 +151,10 @@ class Matrix_mul_generator
 		matrix_data
 	end
 
+	def generate_tasks()
+		out = generate_m_tasks()
+		out += generate_s_tasks()
+		out += generate_out_tasks()
+		out 
+	end
 end
-
-

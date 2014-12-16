@@ -51,12 +51,18 @@ module Misc
 
 	def self.task_sender()
 		puts 'Misc::task_sender' if $debug_trace
+		del = Array.new
 		$task_stack.each do |t|
 			if(t.dest_id != $node_id)
-				$task_stack.delete t
+				# $task_stack.delete t
+				del.push t
 				Misc::send_ser(t, t.dest_id, 'transfer')
 			end
 		end
+		del.each do |el|
+			$task_stack.delete el 
+		end
+		nil
 	end
 
 	def self.data_search(id)
@@ -88,6 +94,24 @@ module Misc
 		$data_accept = false
 		$data_not_found = 0
 		nil
+	end
+
+	def self.data_ready?(data_list)
+		out = true
+		if($data_stack.size == 0)
+			return false
+		end
+		data_list.each do |id|
+			$data_stack.each do |data|
+				break if data.id.eql? id 
+				out = false 
+			end
+		end
+		out 
+	end
+
+	def self.sort_task()
+		$task_stack.sort! {|x, y| x.priority <=> y.priority}
 	end
 
 	def self.wait_for_mutex()
@@ -182,6 +206,18 @@ class Matrix
 			puts ''
 		end
 		puts ''
+	end
+
+	def to_s()
+		out = ''
+		@dim.times do |i|
+			@dim.times do |j|
+				out += "#{@data[i][j]} "
+			end
+			out += "\n"
+		end
+		out += "\n"
+		out
 	end
 
 end

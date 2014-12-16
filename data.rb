@@ -4,4 +4,8 @@ class Data_
 		@id = id
 		@data = data
 	end
+
+  def to_s()
+    "#{id}\n#{data.to_s}"
+  end
 end
