@@ -93,6 +93,12 @@ module Misc
 		nil
 	end
 
+	def self.remove_data_all(id)
+		Connection::send('left', 'remove_all', id)
+		Connection::send('right', 'remove_all', id)
+		Misc::remove_data(id)
+	end
+
 	def self.remove_data(id)
 		$mutex.lock 
 		$data_stack.each do |d|

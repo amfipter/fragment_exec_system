@@ -59,6 +59,13 @@ class Execution
 				sleep 1.0/100
 			end
 			Misc::resolve_data_dep($task_stack[0].data_deps)
+			puts 'REMOVING DATA 1 AFTER 3 SEC'
+			sleep 3
+			Misc::remove_data_all('1')
+			puts 'REMOVING DATA 2 AFTER 3 SEC'
+			sleep 3
+			Misc::remove_data_all('2')
+			puts 'ALL CLEAR'
 		end
 	end
 
