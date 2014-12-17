@@ -15,6 +15,7 @@ $left_client = nil
 $right_client = nil
 $mutex = Mutex.new
 $node_id = nil
+$node_count = -1
 $task_stack = Array.new
 $data_stack = Array.new
 $debug_trace = true
@@ -49,9 +50,13 @@ Signal.trap("TSTP") do
 	Misc::status()
 end
 
+Signal.trap("INT") do 
+	Misc::kill()
+end
+
 Thread.list.each { |thr| thr.join if thr != Thread.main}
 #connection established
-puts "NODE #{$node_id} READY"
+puts "NODE #{$node_id} READY #{$node_count}"
 
 unless($left_client.nil?)
 	Connection::left_listener()

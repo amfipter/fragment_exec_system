@@ -11,7 +11,7 @@ module Connection
 			data = $out_port.to_s
 			while($broadcast)
 				udp.send(data, 0, addr[0], addr[1])
-				sleep 1
+				sleep 1.0/3
 			end
 			udp.close
 		end
@@ -46,9 +46,10 @@ module Connection
 		udp.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR, true)
 		udp.bind(addr[0], addr[1])
 		data, addr = udp.recvfrom(1024)
-		until(data.eql? 'last')
+		until(data =~ /last_(\d+)/)
 			data, addr = udp.recvfrom(1024)
 		end
+    $node_count = $1.to_i
 		udp.close
 		nil
   end
@@ -61,9 +62,10 @@ module Connection
 		udp = UDPSocket.new
 		udp.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR, true)
 		udp.setsockopt(Socket::SOL_SOCKET, Socket::SO_BROADCAST, true)
-		data = 'last'
+		data = 'last_' + ($node_id + 1).to_s
 		udp.send(data, 0, addr[0], addr[1])
 		udp.close
+    $node_count = $node_id + 1
 		nil
 	end
 
@@ -96,27 +98,63 @@ module Connection
   		Misc::status(from)
   	end
 
-  	if(command =~ /get_data(\d+)/)
-  		dest = $1.to_i
-  		data_part = Misc::data_search(data.to_i)
-  		unless(data_part.nil?)
-  			Misc::send_ser(data_part, dest, 'transfer')
-  		else
-  			if(from.eql? 'left')
-  				if($right_client.nil?)
-  					Connection::send(dest, 'transfer', 'data_not_found')
-  				else
-  					Connection::send('right', command, data)
-  				end
-  			else
-  				if($left_client.nil?)
-  					Connection::send(dest, 'transfer', 'data_not_found')
-  				else
-  					Connection::send('left', command, data)
-  				end
-  			end
-  		end
-  	end
+  	# if(command =~ /get_data(\d+)/)
+  	# 	dest = $1.to_i
+  	# 	data_part = Misc::data_search(data.to_i)
+  	# 	unless(data_part.nil?)
+  	# 		Misc::send_ser(data_part, dest, 'transfer')
+  	# 	else
+  	# 		if(from.eql? 'left')
+  	# 			if($right_client.nil?)
+  	# 				Connection::send(dest, 'transfer', 'data_not_found')
+  	# 			else
+  	# 				Connection::send('right', command, data)
+  	# 			end
+  	# 		else
+  	# 			if($left_client.nil?)
+  	# 				Connection::send(dest, 'transfer', 'data_not_found')
+  	# 			else
+  	# 				Connection::send('left', command, data)
+  	# 			end
+  	# 		end
+  	# 	end
+  	# end
+
+    if(command =~ /get_data_(\d+)_(\d+)/)
+      src = $1 
+      dest = $2 
+      if(dest != $node_id) 
+        Connection::send(dest, "get_data_#{src}_", data)
+      else
+        data_part = Misc::data_search(data)
+        Connection::send(src, 'put_data', 'nil') if data_part.nil?
+        Misc::send_ser(data_part, src, 'put_data')
+      end
+      return nil
+    end
+
+    if(command =~ /put_data(\d+)/)
+      dest = $1 
+      if(dest != $node_id)
+        Connection::send(dest, 'put_data', data)
+      else
+        if(data.eql? 'nil')
+          $data_accept = true
+        else
+          $data_accept = true
+          Misc::data_task_deser(data)
+        end
+      end
+      return nil
+    end
+
+
+    if(command.eql? 'kill')
+      Connection::send('left', 'kill', data) if from.eql? 'right'
+      Connection::send('right', 'kill', data) if from.eql? 'left'
+      puts "KILLED."
+      exit()
+    end
 
   end
 

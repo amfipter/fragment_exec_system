@@ -3,18 +3,14 @@ module Misc
 		puts 'Misc::data_task_deser' if $debug_trace
 		Misc::wait_for_mutex()
 		#check
-		$mutex.synchronize do 
-			if(ser_data.eql? 'data_not_found')
-				$data_not_found += 1
-				return nil
-			end
-			data = Marshal.load(eval(ser_data))
-			if (data.class.eql? Data_)
-				$data_stack.push data 
-				$data_accept = true
-			end
-			$task_stack.push data if data.class.eql? Task
+		$mutex.lock
+		data = Marshal.load(eval(ser_data))
+		if (data.class.eql? Data_)
+			$data_stack.push data 
+			$data_accept = true
 		end
+		$task_stack.push data if data.class.eql? Task
+		$mutex.unlock
 		nil
 	end
 
@@ -52,6 +48,7 @@ module Misc
 	def self.task_sender()
 		puts 'Misc::task_sender' if $debug_trace
 		del = Array.new
+		$mutex.lock
 		$task_stack.each do |t|
 			if(t.dest_id != $node_id)
 				# $task_stack.delete t
@@ -62,38 +59,73 @@ module Misc
 		del.each do |el|
 			$task_stack.delete el 
 		end
+		$mutex.unlock
 		nil
+	end
+
+	def self.data_sender()
+		puts 'Misc::data_sender' if $debug_trace
+		del = Array.new 
+		$mutex.lock 
+		$data_stack.each do |data|
+			dest = Misc::get_dest_from_id(data.id)
+			if(dest != $node_id)
+				del.push data 
+				Misc::send_ser(data, dest, 'transfer')
+			end
+		end
+		del.each do |data|
+			$data_stack.delete data 
+		end
+		$mutex.unlock 
 	end
 
 	def self.data_search(id)
+		$mutex.lock 
 		$data_stack.each do |d|
 			if(d.id.eql? id )
 				$data_stack.delete d if $delete_data_copies
+				$mutex.unlock
 				return d
 			end
 		end
+		$mutex.unlock
 		nil
 	end
 
-	def self.get_data(id)
-		$data_stack.each do |data|
-			return nil if data.id.eql? id 
+	def self.get_data_locked(id)
+		data = Misc::get_data(id)
+		while(data.nil?)
+			sleep 1.0/10
+			data = Misc::get_data(id)
 		end
+		data
+	end
 
-		if($left_client.nil? or $right_client.nil?)
-			$data_not_found = 1
+	def self.get_data(id)
+		$mutex.lock
+		$data_stack.each do |data|
+			if(data.id.eql? id)
+				$mutex.unlock
+				return data 
+			end
 		end
-		
-		Connection::send('left', 'get_data'+$node_id.to_s, id)
-		Connection::send('right', 'get_data'+$node_id.to_s, id)
-		while(true) do
-			break if $data_not_found == 2
-			break if $data_accept
-			sleep 1.0/100
-		end
+		$mutex.unlock
+
 		$data_accept = false
-		$data_not_found = 0
-		nil
+		dest = Misc::get_dest_from_id(id)
+		Connection::send(dest, "get_data_#{$node_id}_", id)
+		sleep 1.0/10 until $data_accept
+
+		$mutex.lock
+		$data_stack.each do |data|
+			if(data.id.eql? id)
+				$mutex.unlock
+				return data 
+			end
+		end
+		$mutex.unlock
+		return nil
 	end
 
 	def self.data_ready?(data_list)
@@ -101,17 +133,28 @@ module Misc
 		if($data_stack.size == 0)
 			return false
 		end
+		$mutex.lock 
 		data_list.each do |id|
 			$data_stack.each do |data|
 				break if data.id.eql? id 
 				out = false 
 			end
 		end
+		$mutex.unlock
 		out 
 	end
 
+	def self.kill()
+		puts "KILLED"
+		Connection::send("left", 'kill', 'nil')
+		Connection::send("right", 'kill', 'nil')
+		exit()
+	end
+
 	def self.sort_task()
+		$mutex.lock
 		$task_stack.sort! {|x, y| x.priority <=> y.priority}
+		$mutex.unlock
 	end
 
 	def self.wait_for_mutex()
@@ -121,9 +164,16 @@ module Misc
 		nil
 	end
 
+	def self.get_dest_from_id(id)
+		dest = 0
+		id.each_char {|c| dest += c.ord}
+		dest = dest % ($node_count - 1)
+		dest 
+	end
+
 	def self.resolve_data_dep(data_dep_list)
 		data_dep_list.each do |id|
-			Misc::get_data(id)
+			Misc::get_data_locked(id)
 		end
 		nil
 	end
