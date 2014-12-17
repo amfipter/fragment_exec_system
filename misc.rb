@@ -93,6 +93,18 @@ module Misc
 		nil
 	end
 
+	def self.remove_data(id)
+		$mutex.lock 
+		$data_stack.each do |d|
+			if(d.id.eql? id )
+				$data_stack.delete d 
+				break
+			end
+		end
+		$mutex.unlock
+		nil
+	end
+
 	def self.get_data_locked(id)
 		data = Misc::get_data(id)
 		while(data.nil?)

@@ -121,8 +121,8 @@ module Connection
   	# end
 
     if(command =~ /get_data_(\d+)_(\d+)/)
-      src = $1 
-      dest = $2 
+      src = $1.to_i
+      dest = $2.to_i
       if(dest != $node_id) 
         Connection::send(dest, "get_data_#{src}_", data)
       else
@@ -134,7 +134,7 @@ module Connection
     end
 
     if(command =~ /put_data(\d+)/)
-      dest = $1 
+      dest = $1.to_i
       if(dest != $node_id)
         Connection::send(dest, 'put_data', data)
       else
@@ -144,6 +144,23 @@ module Connection
           $data_accept = true
           Misc::data_task_deser(data)
         end
+      end
+      return nil
+    end
+
+    if(command.eql? 'remove_all')
+      Misc::remove_data(data)
+      Connection::send('left', 'remove_all', data) if from.eql? 'right'
+      Connection::send('right', 'remove_all', data) if from.eql? 'left'
+      return nil
+    end
+
+    if(command =~ /remove(\d+)/)
+      dest = $1.to_i
+      if(dest == $node_id)
+        Misc::remove_data(data)
+      else 
+        Connection::send(dest, 'remove', data)
       end
       return nil
     end
