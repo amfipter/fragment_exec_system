@@ -126,17 +126,17 @@ module Misc
 	end
 
 	def self.get_data_locked(id)
-		puts 'Misc::get_data_locked'.green if $debug_trace
+		puts "Misc::get_data_locked #{id} #{Misc::get_dest_from_id(id)}".green if $debug_trace
 		data = Misc::get_data(id)
 		while(data.nil?)
-			sleep 1.0/10
+			sleep 1.0/2
 			data = Misc::get_data(id)
 		end
 		data
 	end
 
 	def self.get_data(id)
-		puts 'Misc::get_data'.green if $debug_trace
+		# puts 'Misc::get_data'.green if $debug_trace
 		$mutex.lock
 		$data_stack.each do |data|
 			if(data.id.eql? id)
@@ -197,7 +197,7 @@ module Misc
 	def self.get_dest_from_id(id)
 		dest = 0
 		id.each_char {|c| dest += c.ord}
-		dest = dest % ($node_count - 1)
+		dest = dest % ($node_count)
 		dest 
 	end
 

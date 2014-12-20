@@ -20,20 +20,19 @@ class Execution
 		if($node_id == 0)
 			$task_stack = tasks
 			$data_stack = matrix_head_task.generate_data()
-			Misc::status()
 			Misc::task_sender()
 			Misc::data_sender()
 		end
 		
-		sleep 1
-		# while(true) do 
-		# 	sleep 1.0/10 while $task_stack.size == 0
-		# 	Misc::sort_task()
-		# 	$task_stack.each do |task|
-		# 		Misc::resolve_data_dep(task.getInputDFs())
-		# 	end
-		# 	sleep 1.0/100
-		# end
+		# sleep 1
+		while(true) do 
+			sleep 1.0/10 while $task_stack.size == 0
+			Misc::sort_task()
+			$task_stack.each do |task|
+				Misc::resolve_data_dep(task.getInputDFs())
+			end
+			sleep 1.0/100
+		end
 	end
 
 	#task transfer test
