@@ -5,10 +5,10 @@ module Misc
 		Misc::wait_for_mutex()
 		#check
 		$mutex.lock
-		if(ser_data =~ /$Data\s/)
+		if(ser_data =~ /^Data\s/)
 			$data_stack.push Data_.new_deserialize(ser_data)
 		end
-		if(ser_data =~ /$Task\s/)
+		if(ser_data =~ /^Task\s/)
 			$task_stack.push Task.new_deserialize(ser_data)
 		end
 		$mutex.unlock
@@ -97,15 +97,20 @@ module Misc
 		nil
 	end
 
-	def self.remove_data_all(id)
-		puts 'Misc::remove_data_all'.red if $debug_trace
-		Connection::send('left', 'remove_all', id)
-		Connection::send('right', 'remove_all', id)
-		Misc::remove_data(id)
+	def self.remove_data_src(id)
+		puts 'Misc::remove_data_src'.green if $debug_trace
+		dest = Misc::get_dest_from_id(id)
+		if(dest == $node_id)
+			Misc::remove_data(id)
+		else
+			Connection::send('left', 'remove', id) if dest < $node_id
+			Connection::send('right', 'remove', id) if dest > $node_id
+		end
+		nil
 	end
 
 	def self.remove_data(id)
-		puts 'Misc::remove_data'.green if $debug_trace
+		puts "Misc::remove_data #{id}".green if $debug_trace
 		$mutex.lock 
 		$data_stack.each do |d|
 			if(d.id.eql? id )
@@ -173,7 +178,7 @@ module Misc
 	end
 
 	def self.kill()
-		puts "KILLED"
+		puts "KILLED.".red
 		Connection::send("left", 'kill', 'nil')
 		Connection::send("right", 'kill', 'nil')
 		exit()

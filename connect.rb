@@ -8,7 +8,7 @@ module Connection
 			#addr = ['127.0.0.255', 33333] # ??
 			udp = UDPSocket.new
 			udp.setsockopt(Socket::SOL_SOCKET, Socket::SO_BROADCAST, true)
-			data = $out_port.to_s
+			data = $out_port.to_s + ' ' + Socket.ip_address_list.detect{|intf| intf.ipv4_private?}.ip_address
 			while($broadcast)
 				udp.send(data, 0, addr[0], addr[1])
 				sleep 1.0/3
@@ -30,10 +30,11 @@ module Connection
 		data, addr = udp.recvfrom(1024) # if this number is too low it will drop the larger packets and never give them to you
 		puts "From addr: '%s', msg: '%s'" % [addr[2], data]
 		udp.close
-		$out_port = data.to_i + 1
+		port = $1 if data =~ /^(\d+)\s/
+		$out_port = port.to_i + 1
 		$node_id = $out_port - 30000
-		$left_client = TCPSocket.open(addr[2], data.to_i)
-		puts 'connected: ' + addr[2].to_s + ' ' + data
+		$left_client = TCPSocket.open(addr[2], port.to_i)
+		puts 'connected: ' + addr[2].to_s + ' ' + port
 		nil
   end
 
@@ -151,8 +152,8 @@ module Connection
       if(dest == $node_id)
         Misc::remove_data(data)
       else
-        Connection::send('left', 'remove', 'data') if dest < $node_id
-        Connection::send('right', 'remove', 'data') if dest > $node_id
+        Connection::send('left', 'remove', data) if dest < $node_id
+        Connection::send('right', 'remove', data) if dest > $node_id
       end
       return nil
     end
@@ -161,7 +162,7 @@ module Connection
     if(command.eql? 'kill')
       Connection::send('left', 'kill', data) if from.eql? 'right'
       Connection::send('right', 'kill', data) if from.eql? 'left'
-      puts "KILLED."
+      puts "KILLED.".red
       exit()
     end
 

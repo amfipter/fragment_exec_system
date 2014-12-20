@@ -110,7 +110,7 @@ class Matrix_mul_generator
 
 	def generate_out_tasks()
 		out_tasks = Array.new
-		t = Task.new(0, 'OUT' @out_exec, 2)
+		t = Task.new(0, 'OUT', @out_exec, 2)
 		t.name = "OUT_FRAGMENT"
 		@slices.times do |i|
 			@slices.times do |j|
@@ -127,7 +127,7 @@ class Matrix_mul_generator
 		@slices.times do |i|
 			@slices.times do |j|
 				@slices.times do |k|
-					t = Task.new(@m_fragment_dist[i*@slices**2 + j*@slices + k], "MUL_#{i}_#{j}_#{k}" @m_exec, 0)
+					t = Task.new(@m_fragment_dist[i*@slices**2 + j*@slices + k], "MUL_#{i}_#{j}_#{k}", @m_exec, 0)
 					t.add_data_dep("1m_#{i}_#{j}")
 					t.add_data_dep("2m_#{i}_#{k}")
 					t.name = "M_FRAGMENT"

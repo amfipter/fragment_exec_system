@@ -46,12 +46,13 @@ class Execution
 
 	#resolve task deps test
 	def test3()
+		t = Task.new(2, '1')
+		t.add_data_dep('1')
+		t.add_data_dep('2') 
+		$task_map[t.id] = t
 		if($node_id == 0)
 			$data_stack.push Data_.new('1')
 			$data_stack.push Data_.new('2')
-			t = Task.new(2)
-			t.add_data_dep('1')
-			t.add_data_dep('2')
 			$task_stack.push t
 			Misc::data_sender()
 		elsif($node_id == 2)
@@ -61,10 +62,10 @@ class Execution
 			Misc::resolve_data_dep($task_stack[0].data_deps)
 			puts 'REMOVING DATA 1 AFTER 3 SEC'
 			sleep 3
-			Misc::remove_data_all('1')
+			Misc::remove_data_src('1')
 			puts 'REMOVING DATA 2 AFTER 3 SEC'
 			sleep 3
-			Misc::remove_data_all('2')
+			Misc::remove_data_src('2')
 			puts 'ALL CLEAR'
 		end
 	end

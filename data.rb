@@ -10,7 +10,9 @@ class Data_
   end
 
   def serialize()
-    "Data #{id} #{@data.class.to_s} #{@data.serialize}"
+  	data_ser = ''
+  	data_ser = @data.serialize unless data.nil?
+    "Data #{id} #{@data.class.to_s} #{@data_ser}"
   end
 
   def self.new_deserialize(str)
@@ -22,7 +24,7 @@ class Data_
     id = str.shift 
     data_type = str.shift
     data_ser = str.join ' '
-    data = (Module.const_get(data_type)).new_deserialize(data_ser)
+    data = (Module.const_get(data_type)).new_deserialize(data_ser) unless data_type.eql? 'NilClass'
     obj = new(id, data)
     obj
   end
