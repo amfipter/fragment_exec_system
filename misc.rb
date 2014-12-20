@@ -210,10 +210,16 @@ module Misc
 		end
 		nil
 	end
+
+	def self.task_map(tasks)
+		tasks.each do |task|
+			$task_map[task.id] = task
+		end
+		nil
+	end
 end
 
 
-#Matrix serialize
 class Matrix
 	attr_reader :dim, :data
 	def initialize(dim, slices, empty=false)

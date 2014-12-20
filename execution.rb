@@ -4,26 +4,32 @@ class Execution
 	end
 
 	def run()
-		test3()
-		Misc::task_sender()
-		# if($node_id == 0)
-		# 	main_task = Matrix_mul_generator.new(3)
-		# 	main_task.random_m_dist()
-		# 	main_task.random_s_dist()
-		# 	$task_stack = main_task.generate_tasks()
-		# 	$data_stack = main_task.generate_data()
-		# end
+		matrix_mul()
+		# test3()
 		# Misc::task_sender()
-		# while(true) do
-		# 	sleep 1.0/10 while $task_stack.size == 0
-		# 	Misc::sort_task()
-		# 	$task_stack.each do |task|
-		# 		Misc::resolve_data_dep(task.getInputDFs())
-		# 	end
-		# 	sleep 1.0/100
-		# end
-		# puts 'READY'
 		nil
+	end
+
+	def matrix_mul()
+		matrix_head_task = Matrix_mul_generator.new(3)
+		matrix_head_task.random_m_dist()
+		matrix_head_task.random_s_dist()
+		tasks = matrix_head_task.generate_tasks()
+		Misc::task_map(tasks)
+		if($node_id == 0)
+			$task_stack = tasks
+			$data_stack = matrix_head_task.generate_data()
+		end
+		Misc::task_sender()
+		Misc::data_sender()
+		while(true) do 
+			sleep 1.0/10 while $task_stack.size == 0
+			Misc::sort_task()
+			$task_stack.each do |task|
+				Misc::resolve_data_dep(task.getInputDFs())
+			end
+			sleep 1.0/100
+		end
 	end
 
 	#task transfer test
