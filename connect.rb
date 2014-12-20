@@ -98,33 +98,12 @@ module Connection
   		Misc::status(from)
   	end
 
-  	# if(command =~ /get_data(\d+)/)
-  	# 	dest = $1.to_i
-  	# 	data_part = Misc::data_search(data.to_i)
-  	# 	unless(data_part.nil?)
-  	# 		Misc::send_ser(data_part, dest, 'transfer')
-  	# 	else
-  	# 		if(from.eql? 'left')
-  	# 			if($right_client.nil?)
-  	# 				Connection::send(dest, 'transfer', 'data_not_found')
-  	# 			else
-  	# 				Connection::send('right', command, data)
-  	# 			end
-  	# 		else
-  	# 			if($left_client.nil?)
-  	# 				Connection::send(dest, 'transfer', 'data_not_found')
-  	# 			else
-  	# 				Connection::send('left', command, data)
-  	# 			end
-  	# 		end
-  	# 	end
-  	# end
-
-    if(command =~ /get_data_(\d+)_(\d+)/)
+    if(command =~ /get_data(\d+)/)
       src = $1.to_i
-      dest = $2.to_i
+      dest = Misc::get_dest_from_id(data)
       if(dest != $node_id) 
-        Connection::send(dest, "get_data_#{src}_", data)
+        Connection::send('left', "get_data#{src}", data) if dest < $node_id
+        Connection::send('right', "get_data#{src}", data) if dest > $node_id
       else
         data_part = Misc::data_search(data)
         Connection::send(src, 'put_data', 'nil') if data_part.nil?
@@ -148,6 +127,7 @@ module Connection
       return nil
     end
 
+    #old
     if(command.eql? 'remove_all')
       Misc::remove_data(data)
       Connection::send('left', 'remove_all', data) if from.eql? 'right'
@@ -155,12 +135,24 @@ module Connection
       return nil
     end
 
+    #old
     if(command =~ /remove(\d+)/)
       dest = $1.to_i
       if(dest == $node_id)
         Misc::remove_data(data)
       else 
         Connection::send(dest, 'remove', data)
+      end
+      return nil
+    end
+
+    if(command.eql? "remove")
+      dest = Misc::get_dest_from_id(data)
+      if(dest == $node_id)
+        Misc::remove_data(data)
+      else
+        Connection::send('left', 'remove', 'data') if dest < $node_id
+        Connection::send('right', 'remove', 'data') if dest > $node_id
       end
       return nil
     end

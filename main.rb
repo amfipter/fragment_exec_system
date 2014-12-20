@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require 'colorize'
 require './connect.rb'
 require './misc.rb'
 require './execution.rb'
@@ -22,6 +23,7 @@ $debug_trace = true
 $lisnener_work = true
 $data_accept = false
 $data_not_found = 0
+$task_map = Hash.new
 
 $delete_data_copies = false
 

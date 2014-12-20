@@ -1,7 +1,7 @@
 class Task
 	attr_reader :dest_id, :data_deps, :priority
   attr_accessor :name
-	def initialize(dest_id, exec=nil, p = 0)
+	def initialize(dest_id, id, exec=nil, p = 0)
 		@dest_id = dest_id
 		@name = ''
     @data_deps = Array.new
@@ -27,5 +27,18 @@ class Task
   def run(input_data)
     @output_data = @execution_code.call(input_data)
     @output_data
+  end
+
+  def serialize()
+    "Task #{id}"
+  end
+
+  def self.new_deserialize(str)
+    str = str.split ' '
+    unless(str.shift.eql? 'Task')
+      puts "wrong deserialization".red
+      return nil
+    end
+    $task_map[str.shift].clone
   end
 end

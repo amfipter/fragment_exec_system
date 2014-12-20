@@ -1,23 +1,25 @@
 module Misc
+	#old
 	def self.data_task_deser(ser_data)
-		puts 'Misc::data_task_deser' if $debug_trace
+		puts 'Misc::data_task_deser'.green if $debug_trace
 		Misc::wait_for_mutex()
 		#check
 		$mutex.lock
-		data = Marshal.load(eval(ser_data))
-		if (data.class.eql? Data_)
-			$data_stack.push data 
-			$data_accept = true
+		if(ser_data =~ /$Data\s/)
+			$data_stack.push Data_.new_deserialize(ser_data)
 		end
-		$task_stack.push data if data.class.eql? Task
+		if(ser_data =~ /$Task\s/)
+			$task_stack.push Task.new_deserialize(ser_data)
+		end
 		$mutex.unlock
 		nil
 	end
 
+	#old
 	def self.send_ser(data, dest, command)
-		puts 'Misc::send_ser' if $debug_trace
-		ser_data = Marshal.dump(data).dump
-		Connection::send(dest, command, ser_data)
+		puts 'Misc::send_ser'.green if $debug_trace
+		Connection::send(dest, command, data.serialize)
+		nil
 	end
 
 	def self.status(from = '')
@@ -46,7 +48,7 @@ module Misc
 	end
 
 	def self.task_sender()
-		puts 'Misc::task_sender' if $debug_trace
+		puts 'Misc::task_sender'.green if $debug_trace
 		del = Array.new
 		$mutex.lock
 		$task_stack.each do |t|
@@ -64,7 +66,7 @@ module Misc
 	end
 
 	def self.data_sender()
-		puts 'Misc::data_sender' if $debug_trace
+		puts 'Misc::data_sender'.green if $debug_trace
 		del = Array.new 
 		$mutex.lock 
 		$data_stack.each do |data|
@@ -78,9 +80,11 @@ module Misc
 			$data_stack.delete data 
 		end
 		$mutex.unlock 
+		nil
 	end
 
 	def self.data_search(id)
+		puts 'Misc::data_search'.green if $debug_trace
 		$mutex.lock 
 		$data_stack.each do |d|
 			if(d.id.eql? id )
@@ -94,12 +98,14 @@ module Misc
 	end
 
 	def self.remove_data_all(id)
+		puts 'Misc::remove_data_all'.red if $debug_trace
 		Connection::send('left', 'remove_all', id)
 		Connection::send('right', 'remove_all', id)
 		Misc::remove_data(id)
 	end
 
 	def self.remove_data(id)
+		puts 'Misc::remove_data'.green if $debug_trace
 		$mutex.lock 
 		$data_stack.each do |d|
 			if(d.id.eql? id )
@@ -112,6 +118,7 @@ module Misc
 	end
 
 	def self.get_data_locked(id)
+		puts 'Misc::get_data_locked'.green if $debug_trace
 		data = Misc::get_data(id)
 		while(data.nil?)
 			sleep 1.0/10
@@ -121,6 +128,7 @@ module Misc
 	end
 
 	def self.get_data(id)
+		puts 'Misc::get_data'.green if $debug_trace
 		$mutex.lock
 		$data_stack.each do |data|
 			if(data.id.eql? id)
@@ -132,7 +140,8 @@ module Misc
 
 		$data_accept = false
 		dest = Misc::get_dest_from_id(id)
-		Connection::send(dest, "get_data_#{$node_id}_", id)
+		Connection::send('left', "get_data#{$node_id}", id) if dest < $node_id
+		Connection::send('right', "get_data#{$node_id}", id) if dest > $node_id
 		sleep 1.0/10 until $data_accept
 
 		$mutex.lock
@@ -147,6 +156,7 @@ module Misc
 	end
 
 	def self.data_ready?(data_list)
+		puts 'Misc::data_ready?'.green if $debug_trace
 		out = true
 		if($data_stack.size == 0)
 			return false
@@ -197,6 +207,8 @@ module Misc
 	end
 end
 
+
+#Matrix serialize
 class Matrix
 	attr_reader :dim, :data
 	def initialize(dim, slices, empty=false)
@@ -274,6 +286,7 @@ class Matrix
 			puts ''
 		end
 		puts ''
+		return nil
 	end
 
 	def to_s()
@@ -286,6 +299,24 @@ class Matrix
 		end
 		out += "\n"
 		out
+	end
+
+	def serialize()
+		"#{@dim} #{@slices} #{@data.to_s}"
+	end
+
+	def deserialize(str)
+		str = str.split ' '
+		@dim = str[0].to_i
+		@slices = str[1].to_i
+		@data = eval str[2]
+		return nil
+	end
+
+	def self.new_deserialize(str)
+		obj = new(1, 1, 1)
+		obj.deserialize(str)
+		obj
 	end
 
 end
