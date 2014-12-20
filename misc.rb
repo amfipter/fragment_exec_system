@@ -208,6 +208,7 @@ module Misc
 	end
 
 	def self.resolve_data_dep_locked(data_dep_list)
+		data_dep_list.each {|data| puts "SEARCH: #{data}".red} if $debug_trace
 		data_dep_list.each do |id|
 			Misc::get_data_locked(id)
 		end
@@ -227,6 +228,13 @@ module Misc
 			$task_map[task.id] = task
 		end
 		nil
+	end
+
+	def self.clear_data(id_pattern)
+		del = Array.new 
+		$data_stack.each {|data| del.push data if data =~ /#{id_pattern}/}
+		del.each {|data| $data_stack.delete data}
+		nil 
 	end
 end
 

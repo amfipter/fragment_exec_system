@@ -47,8 +47,8 @@ class Matrix_mul_generator
 			m_out = Matrix::mul_part(m1.data, m2.data)
 			x = $1 if m1.id =~ /1m_\d+_(\d+)/			# i j
 			y = $1 if m2.id =~ /2m_\d+_(\d+)/			# i k
-			#z = $1 if m2.id =~ /1m_(\d+)_\d+/			# k j
-			out = Data_.new("c_#{y}_#{x}_#{y}", m_out)	#k j k
+			z = $1 if m1.id =~ /1m_(\d+)_\d+/			# k j
+			out = Data_.new("c_#{y}_#{x}_#{z}", m_out)	#k j k
 		end
 	end
 
@@ -70,13 +70,13 @@ class Matrix_mul_generator
 	def set_out_exec()
 		@out_exec = Proc.new do |input_data|
 			size = Math::sqrt(input_data.size) * input_data[0].data.data.size
-			m = Matrix.new(size, Math::sqrt(input_data.size))
+			m = Matrix.new(size.to_i, Math::sqrt(input_data.size).to_i)
 			input_data.each do |t|
 				x = $1 if t.id =~ /out_(\d+)/
 				y = $1 if t.id =~ /out_\d+_(\d+)/
 				m.slice_in(x.to_i, y.to_i, t.data)
-			end
-			out = Data_.new('result')
+			end 
+			out = Data_.new('result', m)
 			out 
 		end
 	end
@@ -146,6 +146,8 @@ class Matrix_mul_generator
 		matrix_data = Array.new
 		m1 = Matrix.new(@matrix_dim, @slices)
 		m2 = Matrix.new(@matrix_dim, @slices)
+		m1.print_
+		m2.print_ 
 		@slices.times do |i|
 			@slices.times do |j|
 				matrix_data.push Data_.new("1m_#{i}_#{j}", m1.slice_out(i,j))

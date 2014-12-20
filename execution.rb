@@ -32,14 +32,18 @@ class Execution
 		end
 		Misc::sort_task()
 
-		while(true) do 
+		while($task_stack.size > 0) do 
+			# if($task_stack.size <= 3)
+			# 	Misc::remove_m_data()
+			# end
 			task = $task_stack.shift
-			dep_resolve = Misc::resolve_data_dep(task.getInputDFs())
-			unless(dep_resolve)
-				$task_stack.push task
-				next 
-			end
+			# dep_resolve = Misc::resolve_data_dep(task.getInputDFs())
+			# unless(dep_resolve)
+			# 	$task_stack.push task
+			# 	next 
+			# end
 			input_data = Array.new
+			Misc::resolve_data_dep_locked(task.getInputDFs())
 			task.getInputDFs.each do |id|
 				input_data.push Misc::get_data(id)
 			end
@@ -51,6 +55,7 @@ class Execution
 			Misc::data_sender()
 			sleep 1.0/100
 		end
+		puts "DONE".red
 	end
 
 	#task transfer test
