@@ -17,6 +17,7 @@ class Execution
 		tasks = matrix_head_task.generate_tasks()
 		puts tasks.size.to_s.blue
 		Misc::task_map(tasks)
+		puts $task_map.keys.size
 		if($node_id == 0)
 			$task_stack = tasks
 			$data_stack = matrix_head_task.generate_data()
@@ -24,11 +25,11 @@ class Execution
 			Misc::data_sender()
 		end
 		
-		sleep 1
+		# sleep 1
 		group = -1
 		while($task_stack.size == 0)
 			puts "waiting".green
-			sleep 1 
+			sleep 1.0/10
 		end
 		Misc::sort_task()
 
@@ -53,9 +54,12 @@ class Execution
 			puts "\tDONE".red
 			$data_stack.push output_data unless output_data.nil?
 			Misc::data_sender()
-			sleep 1.0/100
+			# sleep 1.0/100
 		end
 		puts "DONE".red
+		if($node_id == 0)
+			Misc::kill
+		end
 	end
 
 	#task transfer test

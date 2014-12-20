@@ -129,7 +129,7 @@ module Misc
 		puts "#{Thread.current.thread_variable_get("id")}: Misc::get_data_locked #{id} #{Misc::get_dest_from_id(id)}".green if $debug_trace
 		data = Misc::get_data(id)
 		while(data.nil?)
-			sleep 1.0/2
+			sleep 1.0/50
 			data = Misc::get_data(id)
 		end
 		data

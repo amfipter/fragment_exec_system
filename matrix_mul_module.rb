@@ -43,12 +43,11 @@ class Matrix_mul_generator
 		@m_exec = Proc.new do |input_data|
 			m1 = input_data.pop
 			m2 = input_data.pop 
-			puts m1.id 
 			m_out = Matrix::mul_part(m1.data, m2.data)
-			x = $1 if m1.id =~ /1m_\d+_(\d+)/			# i j
-			y = $1 if m2.id =~ /2m_\d+_(\d+)/			# i k
-			z = $1 if m1.id =~ /1m_(\d+)_\d+/			# k j
-			out = Data_.new("c_#{y}_#{x}_#{z}", m_out)	#k j k
+			i = $1 if m1.id =~ /1m_(\d+)_\d+/			# i 
+			j = $1 if m2.id =~ /2m_\d+_(\d+)/			# k
+			k = $1 if m1.id =~ /1m_\d+_(\d+)/			# j
+			out = Data_.new("c_#{i}_#{j}_#{k}", m_out)	
 		end
 	end
 
@@ -76,6 +75,7 @@ class Matrix_mul_generator
 				y = $1 if t.id =~ /out_\d+_(\d+)/
 				m.slice_in(x.to_i, y.to_i, t.data)
 			end 
+			m.print_ 
 			out = Data_.new('result', m)
 			out 
 		end
@@ -132,8 +132,8 @@ class Matrix_mul_generator
 			@slices.times do |j|
 				@slices.times do |k|
 					t = Task.new(@m_fragment_dist[i*@slices**2 + j*@slices + k], "MUL_#{i}_#{j}_#{k}", @m_exec, 0)
-					t.add_data_dep("1m_#{i}_#{j}")
-					t.add_data_dep("2m_#{i}_#{k}")
+					t.add_data_dep("1m_#{i}_#{k}")
+					t.add_data_dep("2m_#{k}_#{j}")
 					t.name = "M_FRAGMENT"
 					m_tasks.push t 
 				end

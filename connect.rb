@@ -84,7 +84,7 @@ module Connection
 
   def self.command_parser(command, data, from)
   	puts "#{Thread.current.thread_variable_get("id")}: Connection::command_parser".magenta if $debug_trace
-  	puts "get command: #{command} #{data}".magenta
+  	puts "get command: #{command} #{data}".magenta  if $debug_trace
   	if(command =~ /transfer(\d+)/)
   		dest = $1.to_i
   		if(dest == $node_id)
