@@ -40,6 +40,8 @@ class Task
       puts "wrong deserialization".red
       return nil
     end
+    puts str
+    puts $task_map
     $task_map[str.shift].clone
   end
 end

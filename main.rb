@@ -14,18 +14,20 @@ $broadcast = true
 $out_port = 30000
 $left_client = nil
 $right_client = nil
-$mutex = Mutex.new
+$mutex = FakeMutex.new
 $node_id = nil
 $node_count = -1
 $task_stack = Array.new
 $data_stack = Array.new
-$debug_trace = true
+$debug_trace = false
 $lisnener_work = true
 $data_accept = false
 $data_not_found = 0
 $task_map = Hash.new
 
 $delete_data_copies = false
+
+Thread::abort_on_exception = true
 
 if(ARGV[0].eql? '0')
 	puts '0'
@@ -60,6 +62,7 @@ Thread.current.thread_variable_set(:id, 0)
 #connection established
 puts "NODE #{$node_id} READY #{$node_count}"
 
+
 unless($left_client.nil?)
 	Connection::left_listener()
 end
@@ -67,6 +70,7 @@ end
 unless($right_client.nil?)
 	Connection::right_listener()
 end
+
 e = Execution.new 
 e.run
 

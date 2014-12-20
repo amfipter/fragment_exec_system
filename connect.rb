@@ -8,7 +8,7 @@ module Connection
 			#addr = ['127.0.0.255', 33333] # ??
 			udp = UDPSocket.new
 			udp.setsockopt(Socket::SOL_SOCKET, Socket::SO_BROADCAST, true)
-			data = $out_port.to_s + ' ' + Socket.ip_address_list.detect{|intf| intf.ipv4_private?}.ip_address
+			data = $out_port.to_s  + ' ' + Socket.ip_address_list.detect{|intf| intf.ipv4_private?}.ip_address
 			while($broadcast)
 				udp.send(data, 0, addr[0], addr[1])
 				sleep 1.0/3
@@ -76,6 +76,7 @@ module Connection
     	server = TCPServer.open($out_port)
     	puts "TCP started at " + $out_port.to_s
     	$right_client = server.accept
+    	puts __LINE__
     	$broadcast = false
     end
     nil
@@ -108,7 +109,7 @@ module Connection
       else
         data_part = Misc::data_search(data)
         Connection::send(src, 'put_data', 'nil') if data_part.nil?
-        Misc::send_ser(data_part, src, 'put_data')
+        Misc::send_ser(data_part, src, 'put_data') unless data_part.nil?
       end
       return nil
     end
@@ -176,9 +177,10 @@ module Connection
 
   def self.left_listener
   	puts 'Connection::left_listener' if $debug_trace
-  	Thread.new do 
+  	t = Thread.new do 
   		Thread.current.thread_variable_set(:id, 1)
   		while($lisnener_work) do
+  			# puts "LEFT READY".cyan
   			command = $left_client.gets.chomp
   			data = $left_client.gets.chomp
   			puts "LEFT: #{command}".blue if $debug_trace
@@ -187,15 +189,18 @@ module Connection
     		Connection::command_parser(command, data, 'left')
         # $mutex.unlock
   		end
+  		puts 'LEFT THREAD FAIL'.red 
+  		exit
   	end
-  	nil
+  	t
   end
 
   def self.right_listener
   	puts 'Connection::right_listener' if $debug_trace
-  	Thread.new do 
+  	t = Thread.new do 
   		Thread.current.thread_variable_set(:id, 2)
   		while($lisnener_work) do
+  			# puts "RIGHT READY".cyan
   			command = $right_client.gets.chomp
   			data = $right_client.gets.chomp
   			puts "RIGHT: #{command}".blue if $debug_trace
@@ -204,8 +209,10 @@ module Connection
     		Connection::command_parser(command, data, 'right')
         # $mutex.unlock
   		end
+  		puts 'RIGHT THREAD FAIL'.red 
+  		exit
   	end
-  	nil
+  	t
   end
 
   def self.send(dest, command, data)
