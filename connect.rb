@@ -82,8 +82,8 @@ module Connection
   end
 
   def self.command_parser(command, data, from)
-  	puts 'Connection::command_parser'.magenta if $debug_trace
-  	puts "get command: #{command}".magenta
+  	puts "#{Thread.current.thread_variable_get("id")}: Connection::command_parser".magenta if $debug_trace
+  	puts "get command: #{command} #{data}".magenta
   	if(command =~ /transfer(\d+)/)
   		dest = $1.to_i
   		if(dest == $node_id)
@@ -160,9 +160,15 @@ module Connection
 
 
     if(command.eql? 'kill')
+    	if($debug_trace)
+				Thread.list.each do |t|
+					puts t.thread_variable_get("id").to_s.red
+					puts t.backtrace
+				end
+			end
+			puts "KILLED.".red
       Connection::send('left', 'kill', data) if from.eql? 'right'
       Connection::send('right', 'kill', data) if from.eql? 'left'
-      puts "KILLED.".red
       exit()
     end
 
@@ -203,7 +209,7 @@ module Connection
   end
 
   def self.send(dest, command, data)
-  	puts "Connection::send #{dest}; #{command}" if $debug_trace
+  	puts "#{Thread.current.thread_variable_get("id")}: Connection::send #{dest}; #{command}" if $debug_trace
   	if(dest.class.eql? Fixnum)
   		if(dest < $node_id)
   			unless($left_client.nil?)

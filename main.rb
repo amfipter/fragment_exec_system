@@ -67,7 +67,6 @@ end
 unless($right_client.nil?)
 	Connection::right_listener()
 end
-
 e = Execution.new 
 e.run
 

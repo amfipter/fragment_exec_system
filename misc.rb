@@ -38,6 +38,7 @@ module Misc
 			puts t.to_s
 		end
 		puts '='*20
+		puts from.upcase.red 
 
 		if(from.eql? '')
 			Connection::send('left', 'status', 'nil')
@@ -135,7 +136,7 @@ module Misc
 	end
 
 	def self.get_data(id)
-		puts "#{Thread.current.thread_variable_get("id")}: Misc::get_data".magenta if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::get_data #{id} #{Misc::get_dest_from_id(id)}".magenta if $debug_trace
 		$mutex.lock
 		$data_stack.each do |data|
 			if(data.id.eql? id)
@@ -182,6 +183,12 @@ module Misc
 
 	def self.kill()
 		puts "KILLED.".red
+		if($debug_trace)
+			Thread.list.each do |t|
+				puts t.thread_variable_get("id").to_s.red
+				puts t.backtrace
+			end
+		end
 		Connection::send("left", 'kill', 'nil')
 		Connection::send("right", 'kill', 'nil')
 		exit()
@@ -200,11 +207,19 @@ module Misc
 		dest 
 	end
 
-	def self.resolve_data_dep(data_dep_list)
+	def self.resolve_data_dep_locked(data_dep_list)
 		data_dep_list.each do |id|
 			Misc::get_data_locked(id)
 		end
 		nil
+	end
+
+	def self.resolve_data_dep(data_dep_list)
+		data_dep_list.each do |id|
+			data = Misc::get_data(id)
+			return false if data.nil?
+		end
+		true
 	end
 
 	def self.task_map(tasks)

@@ -7,7 +7,7 @@ class Data_
 	end
 
   def to_s()
-    "ID: #{id}; dest_id: #{Misc::get_dest_from_id(@id)}\n#{data.to_s}"
+    "ID: #{id}; dest_id: #{Misc::get_dest_from_id(@id)}"
   end
 
   def serialize()
