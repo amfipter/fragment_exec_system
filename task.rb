@@ -9,6 +9,7 @@ class Task
     @code = Array.new
     @execution_code = exec
     @output_data = nil
+    @id = id
 	end
 
   def add_data_dep(data_id)
@@ -30,7 +31,7 @@ class Task
   end
 
   def serialize()
-    "Task #{id}"
+    "Task #{@id}"
   end
 
   def self.new_deserialize(str)

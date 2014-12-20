@@ -11,11 +11,12 @@ class Data_
 
   def serialize()
   	data_ser = ''
-  	data_ser = @data.serialize unless data.nil?
-    "Data #{id} #{@data.class.to_s} #{@data_ser}"
+  	data_ser = @data.serialize unless @data.nil?
+    "Data #{id} #{@data.class.to_s} #{data_ser}"
   end
 
   def self.new_deserialize(str)
+  	puts 'new_deserialize'.red 
     str = str.split ' '
     unless(str.shift.eql? "Data")
       puts "wrong deserialization".red

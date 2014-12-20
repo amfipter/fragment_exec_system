@@ -174,6 +174,7 @@ module Connection
   		while($lisnener_work) do
   			command = $left_client.gets.chomp
   			data = $left_client.gets.chomp
+  			puts "LEFT: #{command}".blue if $debug_trace
         # Misc::wait_for_mutex()
         # $mutex.lock
     		Connection::command_parser(command, data, 'left')
@@ -189,6 +190,7 @@ module Connection
   		while($lisnener_work) do
   			command = $right_client.gets.chomp
   			data = $right_client.gets.chomp
+  			puts "RIGHT: #{command}".blue if $debug_trace
         # Misc::wait_for_mutex()
         # $mutex.lock
     		Connection::command_parser(command, data, 'right')

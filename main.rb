@@ -27,7 +27,6 @@ $task_map = Hash.new
 
 $delete_data_copies = false
 
-
 if(ARGV[0].eql? '0')
 	puts '0'
 	Connection::broadcast()

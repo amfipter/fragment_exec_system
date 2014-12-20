@@ -2,13 +2,16 @@ module Misc
 	#old
 	def self.data_task_deser(ser_data)
 		puts 'Misc::data_task_deser'.green if $debug_trace
-		Misc::wait_for_mutex()
 		#check
 		$mutex.lock
 		if(ser_data =~ /^Data\s/)
-			$data_stack.push Data_.new_deserialize(ser_data)
+			puts ser_data.red 
+			data = Data_.new_deserialize(ser_data)
+			puts "GET DATA #{data.to_s}" if $debug_trace
+			$data_stack.push data
 		end
 		if(ser_data =~ /^Task\s/)
+			puts "GET TASK" if $debug_trace
 			$task_stack.push Task.new_deserialize(ser_data)
 		end
 		$mutex.unlock
@@ -17,7 +20,7 @@ module Misc
 
 	#old
 	def self.send_ser(data, dest, command)
-		puts 'Misc::send_ser'.green if $debug_trace
+		puts "Misc::send_ser #{data.serialize}".green if $debug_trace
 		Connection::send(dest, command, data.serialize)
 		nil
 	end
@@ -145,6 +148,7 @@ module Misc
 
 		$data_accept = false
 		dest = Misc::get_dest_from_id(id)
+		return nil if dest == $node_id
 		Connection::send('left', "get_data#{$node_id}", id) if dest < $node_id
 		Connection::send('right', "get_data#{$node_id}", id) if dest > $node_id
 		sleep 1.0/10 until $data_accept
@@ -188,13 +192,6 @@ module Misc
 		$mutex.lock
 		$task_stack.sort! {|x, y| x.priority <=> y.priority}
 		$mutex.unlock
-	end
-
-	def self.wait_for_mutex()
-		while($mutex.locked?)
-			sleep 1.0/100
-		end
-		nil
 	end
 
 	def self.get_dest_from_id(id)
@@ -318,9 +315,10 @@ class Matrix
 
 	def deserialize(str)
 		str = str.split ' '
-		@dim = str[0].to_i
-		@slices = str[1].to_i
-		@data = eval str[2]
+		@dim = str.shift.to_i
+		@slices = str.shift.to_i
+		str = str.join ' '
+		@data = eval str
 		return nil
 	end
 
