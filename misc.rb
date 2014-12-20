@@ -1,6 +1,6 @@
 module Misc
 	def self.data_task_deser(ser_data)
-		puts 'Misc::data_task_deser'.green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::data_task_deser".green if $debug_trace
 		#check
 		$mutex.lock
 		if(ser_data =~ /^Data\s/)
@@ -19,7 +19,7 @@ module Misc
 
 	#old
 	def self.send_ser(data, dest, command)
-		puts "Misc::send_ser #{data.serialize}".green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::send_ser #{data.serialize}".green if $debug_trace
 		Connection::send(dest, command, data.serialize)
 		nil
 	end
@@ -50,7 +50,7 @@ module Misc
 	end
 
 	def self.task_sender()
-		puts 'Misc::task_sender'.green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::task_sender".green if $debug_trace
 		del = Array.new
 		$mutex.lock
 		$task_stack.each do |t|
@@ -68,7 +68,7 @@ module Misc
 	end
 
 	def self.data_sender()
-		puts 'Misc::data_sender'.green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::data_sender".green if $debug_trace
 		del = Array.new 
 		$mutex.lock 
 		$data_stack.each do |data|
@@ -86,7 +86,7 @@ module Misc
 	end
 
 	def self.data_search(id)
-		puts 'Misc::data_search'.green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::data_search".green if $debug_trace
 		$mutex.lock 
 		$data_stack.each do |d|
 			if(d.id.eql? id )
@@ -100,7 +100,7 @@ module Misc
 	end
 
 	def self.remove_data_src(id)
-		puts 'Misc::remove_data_src'.green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::remove_data_src".green if $debug_trace
 		dest = Misc::get_dest_from_id(id)
 		if(dest == $node_id)
 			Misc::remove_data(id)
@@ -112,7 +112,7 @@ module Misc
 	end
 
 	def self.remove_data(id)
-		puts "Misc::remove_data #{id}".green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::remove_data #{id}".green if $debug_trace
 		$mutex.lock 
 		$data_stack.each do |d|
 			if(d.id.eql? id )
@@ -125,7 +125,7 @@ module Misc
 	end
 
 	def self.get_data_locked(id)
-		puts "Misc::get_data_locked #{id} #{Misc::get_dest_from_id(id)}".green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::get_data_locked #{id} #{Misc::get_dest_from_id(id)}".green if $debug_trace
 		data = Misc::get_data(id)
 		while(data.nil?)
 			sleep 1.0/2
@@ -135,7 +135,7 @@ module Misc
 	end
 
 	def self.get_data(id)
-		puts 'Misc::get_data'.magenta if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::get_data".magenta if $debug_trace
 		$mutex.lock
 		$data_stack.each do |data|
 			if(data.id.eql? id)
@@ -164,7 +164,7 @@ module Misc
 	end
 
 	def self.data_ready?(data_list)
-		puts 'Misc::data_ready?'.green if $debug_trace
+		puts "#{Thread.current.thread_variable_get("id")}: Misc::data_ready?".green if $debug_trace
 		out = true
 		if($data_stack.size == 0)
 			return false

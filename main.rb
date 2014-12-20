@@ -56,6 +56,7 @@ Signal.trap("INT") do
 end
 
 Thread.list.each { |thr| thr.join if thr != Thread.main}
+Thread.current.thread_variable_set(:id, 0)
 #connection established
 puts "NODE #{$node_id} READY #{$node_count}"
 
