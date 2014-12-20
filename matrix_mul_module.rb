@@ -26,6 +26,9 @@ class Matrix_mul_generator
 			random_s_dist()
 			random_m_dist()
 		end
+		set_m_exec()
+		set_s_exec()
+		set_out_exec()
 	end
 
 	def set_manual_m_dist(m_dist)
@@ -38,9 +41,10 @@ class Matrix_mul_generator
 
 	def set_m_exec()
 		@m_exec = Proc.new do |input_data|
-			m1 = input_data.pop.data 
-			m2 = input_data.pop.data 
-			m_out = Matrix::mul_part(m1, m2)
+			m1 = input_data.pop
+			m2 = input_data.pop 
+			puts m1.id 
+			m_out = Matrix::mul_part(m1.data, m2.data)
 			x = $1 if m1.id =~ /1m_\d+_(\d+)/			# i j
 			y = $1 if m2.id =~ /2m_\d+_(\d+)/			# i k
 			#z = $1 if m2.id =~ /1m_(\d+)_\d+/			# k j
@@ -54,7 +58,7 @@ class Matrix_mul_generator
 			m1_id = m1.id 
 			m1 = m1.data 
 			input_data.each do |m|
-				Matrix::add_part(m1, m)
+				Matrix::add_part(m1, m.data)
 			end
 			x = $1 if m1_id =~ /c_(\d+)_\d+/
 			y = $1 if m1_id =~ /c_\d+_(\d+)/

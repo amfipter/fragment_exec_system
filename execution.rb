@@ -4,9 +4,9 @@ class Execution
 	end
 
 	def run()
-		matrix_mul()
-		# test3()
-		
+		# matrix_mul()
+		test3()
+		$lisnener_work = false
 		nil
 	end
 
@@ -24,13 +24,25 @@ class Execution
 			Misc::data_sender()
 		end
 		
-		# sleep 1
+		sleep 5
 		while(true) do 
-			sleep 1.0/10 while $task_stack.size == 0
-			Misc::sort_task()
-			$task_stack.each do |task|
-				Misc::resolve_data_dep(task.getInputDFs())
+			while($task_stack.size == 0)
+				puts "waiting".green
+				sleep 1 
 			end
+			Misc::sort_task()
+			task = $task_stack.shift
+			Misc::resolve_data_dep(task.getInputDFs())
+			input_data = Array.new
+			task.getInputDFs.each do |id|
+				input_data.push Misc::get_data(id)
+			end
+			input_data.reverse!
+			puts "EXECUTING #{task.name} #{task.id}".red 
+			output_data = task.run(input_data)
+			puts "\tDONE".red
+			$data_stack.push output_data unless output_data.nil?
+			Misc::data_sender()
 			sleep 1.0/100
 		end
 	end

@@ -82,8 +82,8 @@ module Connection
   end
 
   def self.command_parser(command, data, from)
-  	puts 'Connection::command_parser' if $debug_trace
-  	puts "get command: " + command
+  	puts 'Connection::command_parser'.magenta if $debug_trace
+  	puts "get command: #{command}".magenta
   	if(command =~ /transfer(\d+)/)
   		dest = $1.to_i
   		if(dest == $node_id)

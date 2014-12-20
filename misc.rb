@@ -1,11 +1,10 @@
 module Misc
-	#old
 	def self.data_task_deser(ser_data)
 		puts 'Misc::data_task_deser'.green if $debug_trace
 		#check
 		$mutex.lock
 		if(ser_data =~ /^Data\s/)
-			puts ser_data.red 
+			# puts ser_data.red 
 			data = Data_.new_deserialize(ser_data)
 			puts "GET DATA #{data.to_s}" if $debug_trace
 			$data_stack.push data
@@ -74,7 +73,7 @@ module Misc
 		$mutex.lock 
 		$data_stack.each do |data|
 			dest = Misc::get_dest_from_id(data.id)
-			if(dest != $node_id)
+			if(dest != $node_id and data.move_flag)
 				del.push data 
 				Misc::send_ser(data, dest, 'transfer')
 			end
@@ -136,7 +135,7 @@ module Misc
 	end
 
 	def self.get_data(id)
-		# puts 'Misc::get_data'.green if $debug_trace
+		puts 'Misc::get_data'.magenta if $debug_trace
 		$mutex.lock
 		$data_stack.each do |data|
 			if(data.id.eql? id)
@@ -328,4 +327,22 @@ class Matrix
 		obj
 	end
 
+end
+
+class FakeMutex
+	def initialize()
+		nil
+	end
+
+	def lock()
+		nil
+	end
+
+	def unlock()
+		nil 
+	end
+
+	def locked?()
+		false
+	end
 end
