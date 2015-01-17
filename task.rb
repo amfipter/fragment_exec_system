@@ -39,6 +39,6 @@ class Task
       puts "wrong deserialization".red
       return nil
     end
-   	Misc::restore_task.clone
+   	Misc::restore_task(str.shift).clone
   end
 end
