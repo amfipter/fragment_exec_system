@@ -38,10 +38,12 @@ class Execution
 			end
 			input_data.reverse!
 			puts "EXECUTING #{task.name} #{task.id}".red 
-			output_data, output_tasks = task.run(input_data)
+			out = task.run(input_data)
 			puts "\tDONE".red
-			$data_stack.push output_data unless output_data.nil?
-			$task_stack.push output_tasks unless output_tasks.nil?
+			output_data = out.shift 
+			output_tasks = out.shift
+			$data_stack.push output_data unless output_data.size == 0
+			$task_stack.push output_tasks unless output_tasks.size == 0
 			Misc::data_sender()
 			Misc::task_sender()
 			Misc::sort_task()
@@ -92,10 +94,15 @@ class Execution
 			end
 			input_data.reverse!
 			puts "EXECUTING #{task.name} #{task.id}".red 
-			output_data = task.run(input_data)
+			out = task.run(input_data)
 			puts "\tDONE".red
-			$data_stack.push output_data unless output_data.nil?
+			output_data = out.shift 
+			output_tasks = out.shift
+			$data_stack.push output_data unless output_data.size == 0
+			$task_stack.push output_tasks unless output_tasks.size == 0
 			Misc::data_sender()
+			Misc::task_sender()
+			Misc::sort_task()
 			# sleep 1.0/100
 		end
 		puts "DONE".red

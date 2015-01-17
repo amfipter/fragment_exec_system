@@ -47,8 +47,9 @@ class Matrix_mul_generator
 			i = $1 if m1.id =~ /1m_(\d+)_\d+/			# i 
 			j = $1 if m2.id =~ /2m_\d+_(\d+)/			# k
 			k = $1 if m1.id =~ /1m_\d+_(\d+)/			# j
-			out = Data_.new("c_#{i}_#{j}_#{k}", m_out)	
-			return out, nil
+			out_data = Data_.new("c_#{i}_#{j}_#{k}", m_out)	
+			out_tasks = Array.new
+			[out_data, out_tasks]
 		end
 	end
 
@@ -62,8 +63,9 @@ class Matrix_mul_generator
 			end
 			x = $1 if m1_id =~ /c_(\d+)_\d+/
 			y = $1 if m1_id =~ /c_\d+_(\d+)/
-			out = Data_.new("out_#{x}_#{y}", m1)
-			return out, nil
+			out_data = Data_.new("out_#{x}_#{y}", m1)
+			out_tasks = Array.new
+			[out_data, out_tasks]
 		end
 	end
 
@@ -77,8 +79,9 @@ class Matrix_mul_generator
 				m.slice_in(x.to_i, y.to_i, t.data)
 			end 
 			m.print_ 
-			out = Data_.new('result', m)
-			return out, nil
+			out_data = Data_.new('result', m)
+			out_tasks = Array.new
+			[out_data, out_tasks]
 		end
 	end
 
@@ -169,5 +172,5 @@ class Matrix_mul_generator
 		sleep 1.0/100 if $task_map.keys.size == 0
 		return $task_map[id]
 	end
-	
+
 end
