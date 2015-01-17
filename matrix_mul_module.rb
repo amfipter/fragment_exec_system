@@ -1,4 +1,4 @@
-class Matrix_mul_generator
+class Matrix_mul_module
 	def initialize(node_count, matrix_dim = 9, slices = 3)
 		@node_count = node_count
 		@matrix_dim = matrix_dim
@@ -49,7 +49,7 @@ class Matrix_mul_generator
 			k = $1 if m1.id =~ /1m_\d+_(\d+)/			# j
 			out_data = Data_.new("c_#{i}_#{j}_#{k}", m_out)	
 			out_tasks = Array.new
-			[out_data, out_tasks]
+			[[out_data], out_tasks]
 		end
 	end
 
@@ -65,7 +65,7 @@ class Matrix_mul_generator
 			y = $1 if m1_id =~ /c_\d+_(\d+)/
 			out_data = Data_.new("out_#{x}_#{y}", m1)
 			out_tasks = Array.new
-			[out_data, out_tasks]
+			[[out_data], out_tasks]
 		end
 	end
 
@@ -81,7 +81,7 @@ class Matrix_mul_generator
 			m.print_ 
 			out_data = Data_.new('result', m)
 			out_tasks = Array.new
-			[out_data, out_tasks]
+			[[out_data], out_tasks]
 		end
 	end
 

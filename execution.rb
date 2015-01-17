@@ -42,8 +42,8 @@ class Execution
 			puts "\tDONE".red
 			output_data = out.shift 
 			output_tasks = out.shift
-			$data_stack.push output_data unless output_data.size == 0
-			$task_stack.push output_tasks unless output_tasks.size == 0
+			$data_stack += output_data unless output_data.size == 0
+			$task_stack += output_tasks unless output_tasks.size == 0
 			Misc::data_sender()
 			Misc::task_sender()
 			Misc::sort_task()
@@ -98,8 +98,8 @@ class Execution
 			puts "\tDONE".red
 			output_data = out.shift 
 			output_tasks = out.shift
-			$data_stack.push output_data unless output_data.size == 0
-			$task_stack.push output_tasks unless output_tasks.size == 0
+			$data_stack += output_data unless output_data.size == 0
+			$task_stack += output_tasks unless output_tasks.size == 0
 			Misc::data_sender()
 			Misc::task_sender()
 			Misc::sort_task()

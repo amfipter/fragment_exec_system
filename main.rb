@@ -79,8 +79,9 @@ unless($right_client.nil?)
 	Connection::right_listener()
 end
 
-
 e = Execution.new 
-e.run
+fabric_name = fabric_name[0].upcase + fabric_name[1..fabric_name.length-1]
+$head_task = Module.const_get(fabric_name).new(fabric_args)
+e.universal_execute($head_task)
 
 Thread.list.each { |thr| thr.join if thr != Thread.main}

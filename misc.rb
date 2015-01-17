@@ -195,6 +195,10 @@ module Misc
 	end
 
 	def self.restore_task(id)
+		#why?
+		while($head_task.nil?)
+			sleep 1.0/10
+		end
 		return $head_task.restore_task(id)
 	end
 
