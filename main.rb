@@ -5,7 +5,13 @@ require './misc.rb'
 require './execution.rb'
 require './data.rb'
 require './task.rb'
-require './matrix_mul_module.rb'
+# require './matrix_mul_module.rb'
+
+exec_option = ARGV.shift
+fabric_name = ARGV.shift
+fabric_args = ARGV
+
+require "./#{fabric_name}.rb"
 
 #local search
 #delete data fragment
@@ -24,24 +30,26 @@ $lisnener_work = true
 $data_accept = false
 $data_not_found = 0
 $task_map = Hash.new
+$head_task_node = 0
+$head_task = nil
 
 $delete_data_copies = false
 
 Thread::abort_on_exception = true
 
-if(ARGV[0].eql? '0')
+if(exec_option.eql? '0')
 	puts '0'
 	Connection::broadcast()
 	Connection::create_connection()
 	Connection::wait_last_connection()
 	$node_id = 0
-elsif(ARGV[0].eql? '1')
+elsif(exec_option.eql? '1')
 	puts '1'
 	Connection::connect()
 	Connection::broadcast()
 	Connection::create_connection()
 	Connection::wait_last_connection()
-elsif(ARGV[0].eql? '2')
+elsif(exec_option.eql? '2')
 	Connection::connect()
 	Connection::last_connection_broadcast()
 else
@@ -70,6 +78,7 @@ end
 unless($right_client.nil?)
 	Connection::right_listener()
 end
+
 
 e = Execution.new 
 e.run

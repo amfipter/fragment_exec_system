@@ -3,17 +3,59 @@ class Execution
 		nil
 	end
 
+	#internal method for tests and execution
 	def run()
 		matrix_mul()
 		# test3()
-		# $lisnener_work = false
+		nil
+	end
+
+	#universal execution method 
+	def universal_execute(head_task)
+		tasks = head_task.generate_tasks()
+		Misc::task_map(tasks)
+
+		if($node_id == $head_task_node)
+			$task_stack = tasks 
+			$data_stack = head_task.generate_data()
+			Misc::task_sender()
+			Misc::data_sender()
+		end
+
+		while($task_stack.size == 0)
+			puts "waiting".green
+			sleep 1.0/10
+		end
+
+		Misc::sort_task()
+
+		while($task_stack.size > 0) do 
+			task = $task_stack.shift
+			input_data = Array.new
+			Misc::resolve_data_dep_locked(task.getInputDFs())
+			task.getInputDFs.each do |id|
+				input_data.push Misc::get_data(id)
+			end
+			input_data.reverse!
+			puts "EXECUTING #{task.name} #{task.id}".red 
+			output_data, output_tasks = task.run(input_data)
+			puts "\tDONE".red
+			$data_stack.push output_data unless output_data.nil?
+			$task_stack.push output_tasks unless output_tasks.nil?
+			Misc::data_sender()
+			Misc::task_sender()
+			Misc::sort_task()
+		end
+		puts "DONE".red
+		if($node_id == 0)
+			Misc::kill
+		end
 		nil
 	end
 
 	def matrix_mul()
 		matrix_head_task = Matrix_mul_generator.new(3)
-		# matrix_head_task.random_m_dist()
-		# matrix_head_task.random_s_dist()
+		$head_task = matrix_head_task
 		tasks = matrix_head_task.generate_tasks()
 		puts tasks.size.to_s.blue
 		Misc::task_map(tasks)
@@ -60,6 +102,7 @@ class Execution
 		if($node_id == 0)
 			Misc::kill
 		end
+		nil
 	end
 
 	#task transfer test
@@ -69,6 +112,7 @@ class Execution
 				$task_stack.push Task.new(Random.rand(0..2), nil)
 			end
 		end
+		nil
 	end
 
 	#data transfer test
@@ -78,6 +122,7 @@ class Execution
 		elsif($node_id == 2)
 			Misc::get_data(1)
 		end
+		nil
 	end
 
 	#resolve task deps test
@@ -106,7 +151,5 @@ class Execution
 		end
 		Misc::task_sender()
 	end
-
-	
-
+	nil
 end

@@ -6,7 +6,6 @@ class Task
 		@name = ''
     @data_deps = Array.new
     @priority = p
-    @code = Array.new
     @execution_code = exec
     @output_data = nil
     @id = id
@@ -40,7 +39,6 @@ class Task
       puts "wrong deserialization".red
       return nil
     end
-   	sleep 1.0/100 if $task_map.keys.size == 0
-    $task_map[str.shift].clone
+   	Misc::restore_task.clone
   end
 end

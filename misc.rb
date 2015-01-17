@@ -194,6 +194,10 @@ module Misc
 		exit()
 	end
 
+	def self.restore_task(id)
+		return $head_task.restore_task(id)
+	end
+
 	def self.sort_task()
 		$mutex.lock
 		$task_stack.sort! {|x, y| x.priority <=> y.priority}
