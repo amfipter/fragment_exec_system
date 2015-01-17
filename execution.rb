@@ -49,8 +49,12 @@ class Execution
 			Misc::sort_task()
 		end
 		puts "DONE".red
-		if($node_id == 0)
+		if($node_id == $head_task_node)
 			Misc::kill
+		else
+			while(true)
+				sleep 1.0/10
+			end
 		end
 		nil
 	end
