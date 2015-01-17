@@ -29,6 +29,16 @@ class Task
     @output_data
   end
 
+  def delete_task(id)
+    Misc::remove_data(id)
+    nil
+  end
+
+  def delete_original_task(id)
+    Misc::remove_data_src(id)
+    nil 
+  end
+
   def serialize()
     "Task #{@id}"
   end

@@ -173,4 +173,8 @@ class Matrix_mul_module
 		return $task_map[id]
 	end
 
+	def data_destination(id)
+		nil
+	end
+
 end

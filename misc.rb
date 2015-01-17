@@ -209,6 +209,8 @@ module Misc
 	end
 
 	def self.get_dest_from_id(id)
+		dest = $head_task.data_destination(id)
+		return dest unless dest.nil?
 		dest = 0
 		id.each_char {|c| dest += c.ord}
 		dest = dest % ($node_count)
